@@ -7,10 +7,13 @@
  */
 package ti.exoplayer;
 
+import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.view.LayoutInflater;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
+import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.C;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
@@ -20,8 +23,10 @@ import androidx.media3.datasource.DefaultDataSource;
 import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.datasource.HttpDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
+import androidx.media3.exoplayer.DefaultRenderersFactory;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.LoadControl;
+import androidx.media3.exoplayer.RenderersFactory;
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 import androidx.media3.exoplayer.upstream.DefaultAllocator;
 import androidx.media3.ui.PlayerView;
@@ -40,6 +45,7 @@ public class ExoPlayerView extends TiUIView implements Player.Listener {
     boolean isPlaying = false;
     boolean shouldPrepare = false;
 
+    @SuppressLint("DiscouragedApi")
     public @OptIn(markerClass = UnstableApi.class) ExoPlayerView(TiViewProxy proxy) {
         super(proxy);
 
@@ -78,6 +84,7 @@ public class ExoPlayerView extends TiUIView implements Player.Listener {
                     .build();
         }
 
+
         if (TiConvert.toBoolean(proxy.getProperty("crossProtocolRedirects"), false)) {
             HttpDataSource.Factory httpDataSourceFactory =
                     new DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true);
@@ -92,7 +99,7 @@ public class ExoPlayerView extends TiUIView implements Player.Listener {
         }
         viewWrapper.setPlayer(player);
 
-        if (!mediaUrl.equals("")) {
+        if (!mediaUrl.isEmpty()) {
             setMediaItem(mediaUrl);
         }
 
@@ -100,23 +107,21 @@ public class ExoPlayerView extends TiUIView implements Player.Listener {
     }
 
     @Override
-    public void onMediaMetadataChanged(MediaMetadata mediaMetadata) {
+    public void onMediaMetadataChanged(@NonNull MediaMetadata mediaMetadata) {
         Player.Listener.super.onMediaMetadataChanged(mediaMetadata);
-        if (mediaMetadata != null) {
-            KrollDict kd = new KrollDict();
+        KrollDict kd = new KrollDict();
 
-            if (mediaMetadata.artist != null) kd.put("album", mediaMetadata.artist);
-            if (mediaMetadata.title != null) kd.put("title", mediaMetadata.title);
-            if (mediaMetadata.albumTitle != null) kd.put("albumTitle", mediaMetadata.albumTitle);
-            if (mediaMetadata.albumArtist != null) kd.put("albumArtist", mediaMetadata.albumArtist);
-            if (mediaMetadata.artworkUri != null)
-                kd.put("artworkUrl", mediaMetadata.artworkUri.toString());
+        if (mediaMetadata.artist != null) kd.put("album", mediaMetadata.artist);
+        if (mediaMetadata.title != null) kd.put("title", mediaMetadata.title);
+        if (mediaMetadata.albumTitle != null) kd.put("albumTitle", mediaMetadata.albumTitle);
+        if (mediaMetadata.albumArtist != null) kd.put("albumArtist", mediaMetadata.albumArtist);
+        if (mediaMetadata.artworkUri != null)
+            kd.put("artworkUrl", mediaMetadata.artworkUri.toString());
             /*if (mediaMetadata.artworkData != null) {
                 kd.put("artwork", TiConvert.toBlob(mediaMetadata.artworkData));
             }*/
 
-            fireEvent("metaData", kd);
-        }
+        fireEvent("metaData", kd);
     }
 
     @Override
@@ -136,7 +141,7 @@ public class ExoPlayerView extends TiUIView implements Player.Listener {
     }
 
     @Override
-    public void onEvents(Player player, Player.Events events) {
+    public void onEvents(@NonNull Player player, @NonNull Player.Events events) {
         Player.Listener.super.onEvents(player, events);
     }
 
@@ -150,7 +155,7 @@ public class ExoPlayerView extends TiUIView implements Player.Listener {
     }
 
     @Override
-    public void onPositionDiscontinuity(Player.PositionInfo oldPosition, Player.PositionInfo newPosition, int reason) {
+    public void onPositionDiscontinuity(@NonNull Player.PositionInfo oldPosition, @NonNull Player.PositionInfo newPosition, int reason) {
         Player.Listener.super.onPositionDiscontinuity(oldPosition, newPosition, reason);
         KrollDict kd = new KrollDict();
         kd.put("oldPosition", oldPosition.positionMs);
@@ -194,8 +199,7 @@ public class ExoPlayerView extends TiUIView implements Player.Listener {
     }
 
     public long currentPosition() {
-        long currentPosition = player.getCurrentPosition();
-        return currentPosition;
+        return player.getCurrentPosition();
     }
 
     public long duration() {
