@@ -13,20 +13,19 @@ import android.view.LayoutInflater;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
-import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.C;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
+import androidx.media3.datasource.DataSource;
 import androidx.media3.datasource.DefaultDataSource;
+import androidx.media3.datasource.DefaultDataSourceFactory;
 import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.datasource.HttpDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
-import androidx.media3.exoplayer.DefaultRenderersFactory;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.LoadControl;
-import androidx.media3.exoplayer.RenderersFactory;
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 import androidx.media3.exoplayer.upstream.DefaultAllocator;
 import androidx.media3.ui.PlayerView;
@@ -94,8 +93,13 @@ public class ExoPlayerView extends TiUIView implements Player.Listener {
                     .setMediaSourceFactory(new DefaultMediaSourceFactory(dataSourceFactory))
                     .setLoadControl(loadControl).build();
         } else {
-            player = new ExoPlayer.Builder(TiApplication.getAppCurrentActivity())
-                    .setLoadControl(loadControl).build();
+            ExoPlayer.Builder playerBuilder = new ExoPlayer.Builder(TiApplication.getAppCurrentActivity());
+            if (proxy.hasPropertyAndNotNull("userAgent")) {
+                DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(TiApplication.getAppCurrentActivity().getApplicationContext(),
+                        TiConvert.toString(proxy.getProperty("userAgent")));
+                playerBuilder.setMediaSourceFactory(new DefaultMediaSourceFactory(dataSourceFactory));
+            }
+            playerBuilder.setLoadControl(loadControl).build();
         }
         viewWrapper.setPlayer(player);
 
