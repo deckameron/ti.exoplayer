@@ -99,7 +99,7 @@ public class ExoPlayerView extends TiUIView implements Player.Listener {
                         TiConvert.toString(proxy.getProperty("userAgent")));
                 playerBuilder.setMediaSourceFactory(new DefaultMediaSourceFactory(dataSourceFactory));
             }
-            playerBuilder.setLoadControl(loadControl).build();
+            player = playerBuilder.setLoadControl(loadControl).build();
         }
         viewWrapper.setPlayer(player);
 
